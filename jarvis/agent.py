@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Awaitable, Callable, Iterable
+from typing import Any, Awaitable, Callable
 
+import anthropic
 from anthropic import Anthropic
 
 from .config import Config
@@ -12,15 +13,22 @@ OPUS = "claude-opus-4-7"
 SONNET = "claude-sonnet-4-6"
 
 MAX_TOOL_ITERATIONS = 6
+DEFAULT_MAX_TOKENS = 4096
 
 
 ToolHandler = Callable[[dict[str, Any]], Awaitable[Any]]
 
 
+class AgentError(RuntimeError):
+    pass
+
+
 class Agent:
     def __init__(self, config: Config):
         if not config.anthropic_api_key:
-            raise RuntimeError("ANTHROPIC_API_KEY not set in ~/.jarvis/.env")
+            raise AgentError(
+                "ANTHROPIC_API_KEY not set. add it to ~/.jarvis/.env, then try again."
+            )
         self.client = Anthropic(api_key=config.anthropic_api_key)
         self.config = config
 
@@ -32,7 +40,7 @@ class Agent:
         tool_handlers: dict[str, ToolHandler] | None = None,
         on_tool_call: Callable[[str], None] | None = None,
         model: str = OPUS,
-        max_tokens: int = 2048,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
     ) -> tuple[str, list[dict[str, Any]]]:
         """
         Run a multi-turn tool-use loop. Returns (final_text, updated_messages).
@@ -42,14 +50,35 @@ class Agent:
         tool_handlers = tool_handlers or {}
         convo = [dict(m) for m in messages]
 
+        # System prompt as a block list so we can mark it ephemeral-cached.
+        # Below Opus 4.7's 4096-token prefix minimum this is a silent no-op;
+        # past that (when per-skill context lands) it starts paying off.
+        system_param: list[dict[str, Any]] = [
+            {
+                "type": "text",
+                "text": system,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ]
+
         for _ in range(MAX_TOOL_ITERATIONS):
-            response = self.client.messages.create(
-                model=model,
-                max_tokens=max_tokens,
-                system=system,
-                tools=tools,
-                messages=convo,
-            )
+            try:
+                response = self.client.messages.create(
+                    model=model,
+                    max_tokens=max_tokens,
+                    thinking={"type": "adaptive"},
+                    system=system_param,
+                    tools=tools,
+                    messages=convo,
+                )
+            except anthropic.AuthenticationError as exc:
+                raise AgentError(
+                    "anthropic: 401 — API key invalid. regenerate it at console.anthropic.com and update ~/.jarvis/.env"
+                ) from exc
+            except anthropic.RateLimitError as exc:
+                raise AgentError("anthropic: rate limited — try again in a bit") from exc
+            except anthropic.APIStatusError as exc:
+                raise AgentError(f"anthropic: {exc.status_code} {exc.message}") from exc
 
             assistant_blocks: list[dict[str, Any]] = []
             tool_uses: list[dict[str, Any]] = []
@@ -70,6 +99,14 @@ class Agent:
                     )
                     tool_uses.append(
                         {"id": block.id, "name": block.name, "input": block.input}
+                    )
+                elif block.type == "thinking":
+                    assistant_blocks.append(
+                        {
+                            "type": "thinking",
+                            "thinking": getattr(block, "thinking", ""),
+                            "signature": getattr(block, "signature", ""),
+                        }
                     )
 
             convo.append({"role": "assistant", "content": assistant_blocks})

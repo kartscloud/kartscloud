@@ -16,8 +16,14 @@ That creates `~/.jarvis/`, seeds `~/.jarvis/.env` from `.env.example`, and insta
 
 Fill in `~/.jarvis/.env` with at minimum:
 
-- `ANTHROPIC_API_KEY`
-- `CANVAS_TOKEN` (from Canvas → Account → Settings → Approved Integrations → New Access Token)
+- `ANTHROPIC_API_KEY` — from console.anthropic.com
+- `CANVAS_TOKEN` — Canvas → Account → Settings → Approved Integrations → New Access Token
+
+Then verify:
+
+```bash
+jarvis doctor           # checks API key + DB + Canvas reachability
+```
 
 ## Usage
 
@@ -25,10 +31,13 @@ Fill in `~/.jarvis/.env` with at minimum:
 jarvis                  # conversational REPL — this is the headline UX
 jarvis canvas           # direct school summary
 jarvis ask "…"          # one-shot question
+jarvis doctor           # verify setup
 jarvis --help           # full command surface
 ```
 
 First launch of the day auto-syncs Canvas before the greeting. After that, Canvas is cached 15 min.
+
+Inside the REPL: `/exit` to quit, `/new` for a new session, `/clear` to clear the screen, `/tools` to list tools.
 
 ## What works today
 

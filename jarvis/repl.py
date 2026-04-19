@@ -12,7 +12,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import FormattedText
 from rich.console import Console
 
-from .agent import Agent
+from .agent import Agent, AgentError
 from .config import Config
 from .db import append_chat, kv_get, kv_set, load_chat
 from .prompts.system import SYSTEM_PROMPT
@@ -57,7 +57,12 @@ async def _warm_canvas_if_stale(
 
 async def run(config: Config, conn: sqlite3.Connection) -> None:
     console = Console(theme=THEME)
-    agent = Agent(config)
+    try:
+        agent = Agent(config)
+    except AgentError as exc:
+        console.print(f"[warn]{exc}[/warn]")
+        console.print("[dim]run `jarvis doctor` for a full setup check.[/dim]")
+        return
 
     await _warm_canvas_if_stale(config, conn, console)
 
@@ -129,6 +134,9 @@ async def run(config: Config, conn: sqlite3.Connection) -> None:
             )
         except KeyboardInterrupt:
             console.print("[dim](interrupted)[/dim]")
+            continue
+        except AgentError as exc:
+            console.print(f"[warn]{exc}[/warn]")
             continue
         except Exception as exc:
             console.print(f"[warn]error: {exc}[/warn]")

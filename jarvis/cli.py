@@ -7,8 +7,8 @@ import httpx
 from rich.console import Console
 
 from . import __version__, scheduler
-from .agent import Agent
-from .config import Config, ensure_dirs, load_config
+from .agent import Agent, AgentError
+from .config import JARVIS_HOME, Config, ensure_dirs, load_config
 from .db import get_conn, init_db
 from .prompts.system import SYSTEM_PROMPT
 from .skills import CANVAS_TOOL_SCHEMA, CanvasSkill, render_summary
@@ -103,9 +103,70 @@ def ask(question: str) -> None:
 
     try:
         asyncio.run(_go())
+    except AgentError as exc:
+        console.print(f"[warn]{exc}[/warn]")
+        raise click.Abort()
     except RuntimeError as exc:
         console.print(f"[warn]{exc}[/warn]")
         raise click.Abort()
+
+
+@main.command()
+def doctor() -> None:
+    """Verify config, DB, and external reachability."""
+    config, console = _bootstrap()
+
+    console.print(f"[header]jarvis doctor[/header]")
+    console.print(f"  home       {JARVIS_HOME}")
+    console.print(f"  db         {config.db_path}")
+    console.print(f"  user       {config.user_name} ({config.user_timezone})")
+
+    def mark(ok: bool, label: str, detail: str = "") -> None:
+        tag = "[ok]ok[/ok]" if ok else "[warn]--[/warn]"
+        suffix = f" [dim]{detail}[/dim]" if detail else ""
+        console.print(f"  {tag}  {label}{suffix}")
+
+    # Anthropic
+    if not config.anthropic_api_key:
+        mark(False, "ANTHROPIC_API_KEY", "missing — add to ~/.jarvis/.env")
+    else:
+        mark(True, "ANTHROPIC_API_KEY", f"set ({config.anthropic_api_key[:10]}...)")
+
+    # Canvas
+    if not config.canvas_token:
+        mark(False, "CANVAS_TOKEN", "missing — add to ~/.jarvis/.env")
+    else:
+        async def _probe() -> tuple[bool, str]:
+            conn = get_conn(config.db_path)
+            try:
+                async with CanvasSkill(config, conn) as c:
+                    courses = await c.get_active_courses()
+                return True, f"{len(courses)} active course(s)"
+            except httpx.HTTPStatusError as exc:
+                return False, f"{exc.response.status_code} {exc.response.reason_phrase}"
+            except Exception as exc:
+                return False, str(exc)[:80]
+            finally:
+                conn.close()
+
+        ok, detail = asyncio.run(_probe())
+        mark(ok, "canvas reach", detail)
+
+    # DB
+    conn = get_conn(config.db_path)
+    try:
+        tables = [r[0] for r in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+        )]
+        mark(True, "sqlite tables", ", ".join(tables))
+    finally:
+        conn.close()
+
+    console.print()
+    if config.anthropic_api_key and config.canvas_token:
+        console.print("[ok]all green. run:[/ok] jarvis")
+    else:
+        console.print("[warn]fill in ~/.jarvis/.env, then re-run doctor.[/warn]")
 
 
 @main.group()
