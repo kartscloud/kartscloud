@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jarvis"
+version = "0.1.0"
+description = "Carter's personal operational agent."
+requires-python = ">=3.11"
+readme = "README.md"
+dependencies = [
+    "anthropic>=0.40",
+    "httpx[http2]>=0.27",
+    "click>=8.1",
+    "rich>=13.7",
+    "prompt_toolkit>=3.0",
+    "apscheduler>=3.10",
+    "jinja2>=3.1",
+    "yfinance>=0.2.40",
+    "python-dotenv>=1.0",
+    "pydantic>=2.5",
+    "python-dateutil>=2.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "respx>=0.21",
+]
+
+[project.scripts]
+jarvis = "jarvis.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["jarvis*"]
+
+[tool.setuptools.package-data]
+jarvis = ["templates/*.j2"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

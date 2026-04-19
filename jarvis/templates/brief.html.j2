@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JARVIS brief — {{ date | default("") }}</title>
+<style>
+  :root {
+    --accent: #d4aa00;
+    --bg: #0e0e0f;
+    --panel: #17171a;
+    --line: #2a2a2f;
+    --text: #e7e7ea;
+    --dim: #8a8a90;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 -apple-system, system-ui, "SF Pro Text", sans-serif;
+  }
+  header {
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+  }
+  header .sub { color: var(--dim); font-size: 0.85rem; }
+
+  nav.tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+  nav.tabs a {
+    padding: 0.8rem 1rem;
+    color: var(--dim);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    font-size: 0.9rem;
+  }
+  nav.tabs a.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.25rem 1.5rem 4rem;
+  }
+  .panel {
+    display: none;
+    animation: fade 0.15s ease-out;
+  }
+  .panel.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+
+  .sub-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.75rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+  }
+  .sub-tabs a {
+    padding: 0.35rem 0.7rem;
+    color: var(--dim);
+    text-decoration: none;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    border: 1px solid var(--line);
+  }
+  .sub-tabs a.active {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .sub-panel { display: none; }
+  .sub-panel.active { display: block; }
+
+  h2 { font-size: 1rem; color: var(--accent); letter-spacing: 0.03em; margin: 1.5rem 0 0.5rem; }
+  h3 { font-size: 0.85rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; margin: 1rem 0 0.5rem; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin: 0.5rem 0;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--line); }
+  th { color: var(--dim); font-weight: 500; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.08em; }
+  .pill { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.75rem; background: var(--line); color: var(--dim); }
+  .pill.urgent { background: var(--accent); color: var(--bg); }
+
+  .empty { color: var(--dim); font-style: italic; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>JARVIS</h1>
+  <div class="sub">{{ date | default("—") }} · {{ greeting | default("daily brief") }}</div>
+</header>
+
+<nav class="tabs" id="top-tabs">
+  <a href="#school" data-tab="school" class="active">school</a>
+  <a href="#fitness" data-tab="fitness">fitness</a>
+  <a href="#markets" data-tab="markets">markets</a>
+  <a href="#jobs" data-tab="jobs">jobs</a>
+  <a href="#builds" data-tab="builds">builds</a>
+</nav>
+
+<main>
+
+<section class="panel active" id="school">
+  <nav class="sub-tabs">
+    <a href="#school-today" data-sub="school-today" class="active">today</a>
+    <a href="#school-week" data-sub="school-week">this week</a>
+    <a href="#school-exams" data-sub="school-exams">exams (14d)</a>
+    <a href="#school-overdue" data-sub="school-overdue">overdue</a>
+    <a href="#school-courses" data-sub="school-courses">by course</a>
+  </nav>
+  <div class="sub-panel active" id="school-today"><!-- TODO: due today --></div>
+  <div class="sub-panel" id="school-week"><!-- TODO: due Mon-Sun --></div>
+  <div class="sub-panel" id="school-exams"><!-- TODO: exams next 14d --></div>
+  <div class="sub-panel" id="school-overdue"><!-- TODO: overdue --></div>
+  <div class="sub-panel" id="school-courses"><!-- TODO: by_course --></div>
+</section>
+
+<section class="panel" id="fitness">
+  <nav class="sub-tabs">
+    <a href="#fit-macros" data-sub="fit-macros" class="active">macros</a>
+    <a href="#fit-gym" data-sub="fit-gym">gym</a>
+    <a href="#fit-cardio" data-sub="fit-cardio">cardio</a>
+    <a href="#fit-week" data-sub="fit-week">week</a>
+    <a href="#fit-physique" data-sub="fit-physique">physique</a>
+  </nav>
+  <div class="sub-panel active" id="fit-macros"><!-- TODO: today's macros vs targets --></div>
+  <div class="sub-panel" id="fit-gym"><!-- TODO: lifts log --></div>
+  <div class="sub-panel" id="fit-cardio"><!-- TODO: cardio log --></div>
+  <div class="sub-panel" id="fit-week"><!-- TODO: weekly training volume --></div>
+  <div class="sub-panel" id="fit-physique"><!-- TODO: photo check-ins, recs --></div>
+</section>
+
+<section class="panel" id="markets">
+  <nav class="sub-tabs">
+    <a href="#mk-watch" data-sub="mk-watch" class="active">watchlist</a>
+    <a href="#mk-macro" data-sub="mk-macro">macro</a>
+    <a href="#mk-crypto" data-sub="mk-crypto">crypto</a>
+    <a href="#mk-signals" data-sub="mk-signals">signals</a>
+  </nav>
+  <div class="sub-panel active" id="mk-watch"><!-- TODO: stocks watchlist quotes --></div>
+  <div class="sub-panel" id="mk-macro"><!-- TODO: macro estimator output --></div>
+  <div class="sub-panel" id="mk-crypto"><!-- TODO: BTC/ETH/SOL --></div>
+  <div class="sub-panel" id="mk-signals"><!-- TODO: trading signals --></div>
+</section>
+
+<section class="panel" id="jobs">
+  <nav class="sub-tabs">
+    <a href="#jb-new" data-sub="jb-new" class="active">new postings</a>
+    <a href="#jb-pipeline" data-sub="jb-pipeline">pipeline</a>
+    <a href="#jb-tailor" data-sub="jb-tailor">tailored</a>
+    <a href="#jb-watchlist" data-sub="jb-watchlist">companies</a>
+  </nav>
+  <div class="sub-panel active" id="jb-new"><!-- TODO: unseen matches, scored --></div>
+  <div class="sub-panel" id="jb-pipeline"><!-- TODO: applications by status --></div>
+  <div class="sub-panel" id="jb-tailor"><!-- TODO: per-company research + resume diff + project recs --></div>
+  <div class="sub-panel" id="jb-watchlist"><!-- TODO: companies followed --></div>
+</section>
+
+<section class="panel" id="builds">
+  <nav class="sub-tabs">
+    <a href="#bd-active" data-sub="bd-active" class="active">active</a>
+    <a href="#bd-ideas" data-sub="bd-ideas">ideas</a>
+    <a href="#bd-ship" data-sub="bd-ship">shipped</a>
+  </nav>
+  <div class="sub-panel active" id="bd-active"><!-- TODO: active personal projects --></div>
+  <div class="sub-panel" id="bd-ideas"><!-- TODO: idea queue --></div>
+  <div class="sub-panel" id="bd-ship"><!-- TODO: shipped --></div>
+</section>
+
+</main>
+
+<script>
+(function() {
+  function activate(groupSel, attr, val) {
+    document.querySelectorAll(groupSel).forEach(function(el) {
+      el.classList.toggle("active", el.getAttribute(attr) === val);
+    });
+  }
+  document.querySelectorAll("nav.tabs a").forEach(function(a) {
+    a.addEventListener("click", function(e) {
+      e.preventDefault();
+      var t = a.dataset.tab;
+      activate("nav.tabs a", "data-tab", t);
+      document.querySelectorAll("main > .panel").forEach(function(p) {
+        p.classList.toggle("active", p.id === t);
+      });
+    });
+  });
+  document.querySelectorAll(".sub-tabs a").forEach(function(a) {
+    a.addEventListener("click", function(e) {
+      e.preventDefault();
+      var s = a.dataset.sub;
+      var parent = a.closest("section.panel");
+      parent.querySelectorAll(".sub-tabs a").forEach(function(x) {
+        x.classList.toggle("active", x.dataset.sub === s);
+      });
+      parent.querySelectorAll(".sub-panel").forEach(function(p) {
+        p.classList.toggle("active", p.id === s);
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
