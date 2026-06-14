@@ -3,3 +3,4 @@ __pycache__/
 *.csv
 *.json
 !scripts/projections.example.json
+!scripts/game.example.json

@@ -54,6 +54,24 @@ fitted fair), and `README.md` with a per-bet table + summary stats.
 Output columns: `EDGE`, `EV/$1`, side (YES/NO), `IMPLIED`, `FAIR`, and a
 `[period/metric]` tag plus the market title.
 
+## Forward projection model (`model.py`)
+
+`kalshi_nba_bets.py` reads fair value *out of* Kalshi's prices. `model.py` is the
+opposite — a forward model: you give it the game's expected margin, total,
+per-quarter/half splits and player projections (mean & sd) and it derives every
+probability, printing the `MODEL / fair¢ / fair x / CI width / FD devig / trust`
+table (see `game.example.json`).
+
+```bash
+python3 scripts/model.py --config scripts/game.example.json
+```
+
+- **MODEL** = model probability · **fair¢** = fair price · **fair x** = fair decimal odds
+- **CI width** = 50% interval of the modeled quantity (`1.349·sd`)
+- **FD devig** = FanDuel two-way de-vigged probability (comparison book), or `--`
+- **trust** = high / med / low / PRIOR (`*` = flagged). It also prints the biggest
+  model-vs-FanDuel gaps as edge candidates.
+
 ## Honest limits
 
 - Returns only what Kalshi actually lists. For the 2026 Finals it found rich

@@ -1,0 +1,27 @@
+{
+  "title": "Spurs vs Knicks — Game 5 model (San Antonio home; Knicks lead series 3-2)",
+  "_note": "My own projections. Game margin/total anchored to de-vigged Kalshi prices + NBA priors; FD devig values are illustrative comparison points (no live FanDuel feed in this environment). Margin mean is positive = favors Spurs.",
+  "markets": [
+    { "label": "Spurs win G5",        "type": "win",        "mean": 3.5,  "sd": 12.5, "fd": 0.595, "trust": "high" },
+    { "label": "Spurs cover -3.5",    "type": "cover",      "mean": 3.5,  "sd": 12.8, "line": 3.5,   "fd": 0.500, "trust": "high" },
+    { "label": "Over 215.5",          "type": "total_over", "mean": 215.0,"sd": 18.0, "line": 215.5, "fd": 0.500, "trust": "high" },
+
+    { "label": "Spurs win 1st Half",  "type": "win", "mean": 2.4, "sd": 8.8, "trust": "med" },
+
+    { "label": "Spurs win Q1",        "type": "win", "mean": 2.3, "sd": 6.2, "fd": 0.620, "trust": "low*" },
+    { "label": "Spurs win Q2",        "type": "win", "mean": 0.5, "sd": 6.4, "trust": "low" },
+    { "label": "Spurs win Q3 (>0)",   "type": "win", "mean": 0.2, "sd": 6.3, "trust": "low" },
+    { "label": "Spurs win Q4",        "type": "win", "mean": 0.6, "sd": 6.5, "trust": "low" },
+
+    { "label": "Spurs win SERIES",    "type": "prob", "p": 0.145, "ci": 14.0, "trust": "high" },
+
+    { "label": "Wemby PTS o24.5",     "type": "over", "mean": 25.5, "sd": 8.5,  "line": 24.5 },
+    { "label": "Wemby REB o11.5",     "type": "over", "mean": 11.0, "sd": 3.8,  "line": 11.5, "fd": 0.470 },
+    { "label": "Fox PTS o21.5",       "type": "over", "mean": 22.5, "sd": 7.5,  "line": 21.5 },
+    { "label": "Castle PTS o15.5",    "type": "over", "mean": 16.5, "sd": 6.5,  "line": 15.5 },
+    { "label": "Brunson PTS o27.5",   "type": "over", "mean": 28.5, "sd": 8.5,  "line": 27.5, "fd": 0.520 },
+    { "label": "Towns PTS o19.5",     "type": "over", "mean": 21.0, "sd": 7.5,  "line": 19.5, "fd": 0.560 },
+    { "label": "Anunoby REB o5.5",    "type": "over", "mean": 5.8,  "sd": 2.5,  "line": 5.5,  "fd": 0.515 },
+    { "label": "Bridges PTS o16.5",   "type": "over", "mean": 17.5, "sd": 6.5,  "line": 16.5 }
+  ]
+}
