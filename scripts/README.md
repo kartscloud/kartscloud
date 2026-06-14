@@ -21,6 +21,20 @@ python3 scripts/kalshi_nba_bets.py --model scripts/projections.example.json  # a
 
 Useful flags: `--top N` (rows in best-bets table), `--min-edge 0.04` (min edge to list).
 
+### Visual report (Kalshi vs Here)
+
+`report.py` renders graphs + a short markdown report comparing Kalshi's implied
+probability to this tool's fair value, into `scripts/report/`. Needs matplotlib.
+
+```bash
+pip install matplotlib
+python3 scripts/report.py --top 20 --min-edge 0.05
+```
+
+Produces `top_bets.png` (implied vs fair bars), `scatter.png` (every market's
+mispricing), `quarter_totals.png` (per-quarter ladders: dots = Kalshi, lines =
+fitted fair), and `README.md` with a per-bet table + summary stats.
+
 ## Two layers of quantification
 
 1. **Implied probability** — a Kalshi YES contract at 62c implies ~62% and costs
