@@ -1,62 +1,51 @@
 # kalshi_nba_bets.py — Kalshi NBA probability & best-bet finder
 
-Pulls **every market Kalshi lists for a given NBA matchup** (default: Spurs vs
-Knicks), converts each market's price into an implied probability, and — when you
-supply your own projections — ranks the **best value bets** by edge and expected
-value (EV).
+Finds **every Kalshi market for an NBA matchup** (default: Spurs vs Knicks),
+quantifies all of them, and surfaces the **best value bets** — broken down by
+**period** (each quarter Q1–Q4, halves, full game, series) and by **player across
+every metric** (points, rebounds, assists, threes, steals, blocks, free throws,
+double/triple-doubles, leaders, winners, spreads, totals).
 
-Pure Python 3 standard library. No `pip install`, no API key (Kalshi's market
-read endpoints are public).
+Pure Python 3 stdlib — no `pip install`, no API key (Kalshi market reads are public).
 
 ## Quick start
 
 ```bash
-# Every Spurs/Knicks market + implied probability, sorted high→low:
-python3 scripts/kalshi_nba_bets.py
-
-# A different game:
+python3 scripts/kalshi_nba_bets.py                 # top value bets (auto fair value)
+python3 scripts/kalshi_nba_bets.py --by-period     # every quarter / half, market by market
+python3 scripts/kalshi_nba_bets.py --by-player     # every player, every metric
+python3 scripts/kalshi_nba_bets.py --all --csv all.csv --json all.json   # everything + export
 python3 scripts/kalshi_nba_bets.py --teams "Celtics,Lakers" --abbr "BOS,LAL"
-
-# Rank best bets vs your own projections; only show >=4% edge; save CSV+JSON:
-python3 scripts/kalshi_nba_bets.py \
-  --model scripts/projections.example.json \
-  --min-edge 0.04 --csv bets.csv --json bets.json
+python3 scripts/kalshi_nba_bets.py --model scripts/projections.example.json  # add your own edges
 ```
 
-## How to read it
+Useful flags: `--top N` (rows in best-bets table), `--min-edge 0.04` (min edge to list).
 
-- **Kalshi's price IS the implied probability.** A YES contract at 62c implies
-  ~62% and costs $0.62 to win $1.00. Listing markets = "finding every probability".
-- **A bet is only "best" relative to a better estimate.** The price is already the
-  market's consensus, so the script can't conjure an edge from the price alone.
-  Feed it `--model projections.json` with *your* numbers; it computes
-  `edge = your_prob − implied_prob` and `EV per $1 contract`, then sorts.
-  Without `--model` it just lists every market and its implied probability.
+## Two layers of quantification
 
-## Projections format
+1. **Implied probability** — a Kalshi YES contract at 62c implies ~62% and costs
+   $0.62 to win $1. Listing markets already "finds every probability".
 
-See `projections.example.json`. Each matcher targets markets whose
-title+subtitle contain **all** `contains` strings (and **none** of `exclude`):
+2. **Fair value + edge (automatic, no input needed)** — the price can't tell you a
+   bet is *good* by itself, so the script builds a reference from the market's own data:
+   - **Strike ladders** (a player's 10+/15+/20+/25+ points, a quarter's
+     Over 45.5/48.5/51.5… total) are fit to a normal distribution. The smooth
+     fitted curve is the consensus fair value; strikes that deviate are flagged as
+     value with `edge = fair − implied` and **EV per $1 contract**.
+   - **Multi-outcome markets** (winner: Spurs/Knicks/Tie; leaders) are **de-vigged** —
+     prices normalized to sum to 100% to strip the house margin.
+   - `--model projections.json` lets you override/extend fair values with your own
+     numbers (see `projections.example.json`).
 
-```jsonc
-// player/quarter stat → P(value ≥ threshold) under a normal model.
-// threshold is auto-parsed from the market ("24.5", "10+") unless you set it.
-{ "contains": ["wembanyama","points"], "exclude":["series","leader"],
-  "type": "normal", "mean": 24.0, "sd": 8.0 }
+Output columns: `EDGE`, `EV/$1`, side (YES/NO), `IMPLIED`, `FAIR`, and a
+`[period/metric]` tag plus the market title.
 
-// a binary market → direct probability.
-{ "contains": ["1st quarter winner","spurs"], "type": "prob", "yes": 0.60 }
-```
+## Honest limits
 
-## Honest limitations
-
-- **Coverage:** the script returns only what Kalshi actually lists. For the 2026
-  Finals it found rich per-quarter (totals/spreads/winners) and per-player
-  (points/rebounds/assists/threes/steals/blocks) markets — but for many regular
-  games Kalshi only offers game-level lines. Deep player props live on
-  sportsbooks (DK/FD), not Kalshi.
-- **Matching is substring-based**, so sanity-check the `FAIR`/`IMPL` columns; use
-  `exclude` to dodge look-alikes (e.g. series-long "every game" parlays).
-- **The normal-distribution model is a rough approximation.** Your edge is only as
-  good as the `mean`/`sd` you feed it. Garbage in, garbage out.
-- This is an analysis tool, not betting advice. Markets move; re-run before acting.
+- Returns only what Kalshi actually lists. For the 2026 Finals it found rich
+  per-quarter and per-player markets; many regular games only have game-level lines.
+- Substring matching can mislabel look-alikes — sanity-check `IMPLIED`/`FAIR`.
+- The normal-ladder fit and de-vig are approximations; "fair" reflects the market's
+  own consensus, not inside information. A flagged edge often means *thin/stale
+  pricing on one strike*, not a guaranteed win.
+- Analysis tool, not betting advice. Markets move — re-run before acting.
