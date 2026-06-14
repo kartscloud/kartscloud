@@ -1,0 +1,131 @@
+{
+  "_comment": "YOUR OWN estimates of true probabilities. The script compares these to Kalshi's live prices to compute edge & EV, then ranks best bets. 'contains' = ALL substrings must appear (case-insensitive) in a market's title+subtitle. 'exclude' = skip if ANY appears (use it to dodge series-long parlays). 'normal' = a stat with mean & sd (std dev); the threshold is auto-parsed from the market text (e.g. '24.5', '10+') unless you set 'threshold'. 'prob' = a direct yes probability. Names/teams below match how Kalshi actually labels the 2026 Knicks(NewYork)-Spurs(SanAntonio) Game 5 markets. Replace the numbers with your real projections.",
+  "matchers": [
+    {
+      "contains": [
+        "1st quarter winner",
+        "spurs"
+      ],
+      "type": "prob",
+      "yes": 0.6
+    },
+    {
+      "contains": [
+        "1st quarter winner",
+        "knicks"
+      ],
+      "type": "prob",
+      "yes": 0.37
+    },
+    {
+      "contains": [
+        "1st quarter total"
+      ],
+      "type": "normal",
+      "mean": 56.0,
+      "sd": 8.5
+    },
+    {
+      "contains": [
+        "2nd quarter total"
+      ],
+      "type": "normal",
+      "mean": 55.0,
+      "sd": 8.5
+    },
+    {
+      "contains": [
+        "3rd quarter total"
+      ],
+      "type": "normal",
+      "mean": 55.0,
+      "sd": 8.5
+    },
+    {
+      "contains": [
+        "4th quarter total"
+      ],
+      "type": "normal",
+      "mean": 57.0,
+      "sd": 9.5
+    },
+    {
+      "contains": [
+        "total points"
+      ],
+      "exclude": [
+        "series",
+        "team",
+        "quarter",
+        "half"
+      ],
+      "type": "normal",
+      "mean": 221.0,
+      "sd": 15.0
+    },
+    {
+      "contains": [
+        "victor wembanyama",
+        "points"
+      ],
+      "exclude": [
+        "every game",
+        "leader",
+        "most points",
+        "record the",
+        "series"
+      ],
+      "type": "normal",
+      "mean": 24.0,
+      "sd": 8.0
+    },
+    {
+      "contains": [
+        "jalen brunson",
+        "points"
+      ],
+      "exclude": [
+        "every game",
+        "leader",
+        "most points",
+        "record the",
+        "series"
+      ],
+      "type": "normal",
+      "mean": 28.0,
+      "sd": 8.5
+    },
+    {
+      "contains": [
+        "de'aaron fox",
+        "points"
+      ],
+      "exclude": [
+        "every game",
+        "leader",
+        "most points",
+        "record the",
+        "series"
+      ],
+      "type": "normal",
+      "mean": 21.0,
+      "sd": 7.5
+    },
+    {
+      "contains": [
+        "karl-anthony towns",
+        "points"
+      ],
+      "exclude": [
+        "every game",
+        "leader",
+        "most points",
+        "record the",
+        "series"
+      ],
+      "type": "normal",
+      "mean": 19.0,
+      "sd": 7.0
+    }
+  ]
+}
