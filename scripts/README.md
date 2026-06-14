@@ -72,6 +72,24 @@ python3 scripts/model.py --config scripts/game.example.json
 - **trust** = high / med / low / PRIOR (`*` = flagged). It also prints the biggest
   model-vs-FanDuel gaps as edge candidates.
 
+## Sharp-money tracker (`sharp_tracker.py`)
+
+**Kalshi trade data is anonymous** — there is no account/user identity in the API,
+no public leaderboard, and no way to follow a specific bettor. You cannot track
+named people on Kalshi; nobody can. The next-best thing (and how pros actually do
+it) is tracking the *sharp action itself*: large prints, block trades, aggressive
+taker-flow imbalance, and the price moves they cause.
+
+```bash
+python3 scripts/sharp_tracker.py --hours 6 --top 15     # ranked sharp-action snapshot
+python3 scripts/sharp_tracker.py --alerts --min-size 5000   # only new big/block prints
+```
+
+Per market it reports volume, **net aggressive flow $** (sign = the direction
+takers lean), count of big trades, block trades, the price move over the window,
+and a composite signal score. `--alerts` mode (deduped via `/tmp`) is built for
+scheduled monitoring — run it on an interval to get pinged on whale prints.
+
 ## Honest limits
 
 - Returns only what Kalshi actually lists. For the 2026 Finals it found rich
